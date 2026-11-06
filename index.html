@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Science Study Guide</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; margin: 0; display: flex; color: #333; }
+  .sidebar { width: 250px; background: #f4f4f5; height: 100vh; padding: 20px; box-sizing: border-box; position: fixed; }
+  .sidebar h2 { font-size: 1.2rem; margin-top: 0; }
+  .sidebar button { display: block; width: 100%; text-align: left; padding: 10px; margin-bottom: 5px; border: none; background: none; cursor: pointer; border-radius: 4px; font-size: 1rem; }
+  .sidebar button:hover, .sidebar button.active { background: #e4e4e7; font-weight: bold; }
+  .content { margin-left: 250px; padding: 40px; max-width: 800px; width: 100%; }
+  .section { display: none; }
+  .section.active { display: block; }
+  code { background: #f4f4f5; padding: 2px 5px; border-radius: 4px; font-family: monospace; }
+  .quiz-card { background: #fff; border: 1px solid #e4e4e7; padding: 20px; border-radius: 8px; margin-bottom: 15px; }
+  .quiz-btn { background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+  .quiz-btn:hover { background: #2563eb; }
+  .result { margin-top: 10px; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>Study Guide</h2>
+  <button class="nav-btn active" onclick="showSection('numpy')">1. NumPy</button>
+  <button class="nav-btn" onclick="showSection('pandas')">2. Pandas</button>
+  <button class="nav-btn" onclick="showSection('matplotlib')">3. Matplotlib</button>
+  <button class="nav-btn" onclick="showSection('seaborn')">4. Seaborn</button>
+  <button class="nav-btn" onclick="showSection('plotly')">5. Plotly</button>
+  <button class="nav-btn" onclick="showSection('quiz')">6. Knowledge Quiz</button>
+</div>
+
+<div class="content">
+  <div id="numpy" class="section active">
+    <h1>NumPy Refresher</h1>
+    <p>NumPy is the foundation for numerical computing in Python.</p>
+    <ul>
+      <li><strong>Core Object:</strong> <code>ndarray</code> (N-dimensional array).</li>
+      <li><strong>Creation:</strong> <code>np.array([1, 2, 3])</code> or <code>np.zeros(5)</code>.</li>
+      <li><strong>Sequences:</strong> <code>np.arange(start, stop, step)</code> for integer spacing, <code>np.linspace(start, stop, num)</code> for exact point counts.</li>
+    </ul>
+  </div>
+
+  <div id="pandas" class="section">
+    <h1>Pandas Refresher</h1>
+    <p>Pandas is built for tabular data manipulation.</p>
+    <ul>
+      <li><strong>Core Objects:</strong> <code>Series</code> (1D column) and <code>DataFrame</code> (2D table).</li>
+      <li><strong>Selection:</strong> <code>df.loc[]</code> selects by explicit label, <code>df.iloc[]</code> selects by integer position.</li>
+      <li><strong>Filtering:</strong> <code>df[df['Age'] > 20]</code> uses boolean masking.</li>
+    </ul>
+  </div>
+
+  <div id="matplotlib" class="section">
+    <h1>Matplotlib</h1>
+    <p>The low-level foundation, mimicking MATLAB's plotting style.</p>
+    <ul>
+      <li><strong>Core Submodule:</strong> <code>matplotlib.pyplot</code> (imported as <code>plt</code>).</li>
+      <li><strong>Basic Plotting:</strong> <code>plt.plot(x, y)</code> for lines/markers, <code>plt.scatter(x, y)</code> for dots.</li>
+      <li><strong>Structure:</strong> You build plots step-by-step. <code>plt.title()</code>, <code>plt.xlabel()</code>, and finally <code>plt.show()</code> to display.</li>
+      <li><strong>Subplots:</strong> <code>plt.subplot(rows, cols, index)</code> layers multiple charts.</li>
+    </ul>
+  </div>
+
+  <div id="seaborn" class="section">
+    <h1>Seaborn</h1>
+    <p>High-level statistical storytelling built on top of Matplotlib.</p>
+    <ul>
+      <li><strong>Categorical Plots:</strong> <code>sns.catplot()</code> handles box, violin, strip, and bar plots across grids automatically.</li>
+      <li><strong>Distributions:</strong> <code>sns.kdeplot()</code> applies Kernel Density Estimation for smooth curves; <code>sns.histplot()</code> for bins.</li>
+      <li><strong>Relational & Matrices:</strong> <code>sns.scatterplot()</code> for points, <code>sns.heatmap()</code> for correlation matrices.</li>
+    </ul>
+  </div>
+
+  <div id="plotly" class="section">
+    <h1>Plotly (Plotly Express)</h1>
+    <p>Interactive web-based visualizations.</p>
+    <ul>
+      <li><strong>Interface:</strong> Plotly Express (<code>px</code>) allows you to build complex interactive charts in one line.</li>
+      <li><strong>Features:</strong> Built-in zooming, panning, and hover-data (e.g., <code>px.scatter(df, x='Age', y='Fare', color='Survived')</code>).</li>
+      <li><strong>Exporting:</strong> Saves to interactive HTML using <code>fig.write_html()</code>.</li>
+    </ul>
+  </div>
+
+  <div id="quiz" class="section">
+    <h1>Knowledge Quiz</h1>
+    
+    <div class="quiz-card">
+      <p><strong>1. Which Pandas function selects data by integer position?</strong></p>
+      <input type="radio" name="q1" value="a"> a) <code>df.loc[]</code><br>
+      <input type="radio" name="q1" value="b"> b) <code>df.iloc[]</code><br>
+      <input type="radio" name="q1" value="c"> c) <code>df.ix[]</code><br>
+      <button class="quiz-btn" onclick="checkAnswer('q1', 'b', 'res1')">Check</button>
+      <div id="res1" class="result"></div>
+    </div>
+
+    <div class="quiz-card">
+      <p><strong>2. Which Seaborn function creates a smooth distribution curve using Kernel Density Estimation?</strong></p>
+      <input type="radio" name="q2" value="a"> a) <code>sns.catplot()</code><br>
+      <input type="radio" name="q2" value="b"> b) <code>sns.kdeplot()</code><br>
+      <input type="radio" name="q2" value="c"> c) <code>sns.histplot()</code><br>
+      <button class="quiz-btn" onclick="checkAnswer('q2', 'b', 'res2')">Check</button>
+      <div id="res2" class="result"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  function checkAnswer(qName, correctVal, resId) {
+    const selected = document.querySelector(`input[name="${qName}"]:checked`);
+    const resDiv = document.getElementById(resId);
+    if (!selected) { resDiv.textContent = "Please select an answer."; resDiv.style.color = "orange"; return; }
+    if (selected.value === correctVal) { resDiv.textContent = "Correct!"; resDiv.style.color = "green"; } 
+    else { resDiv.textContent = "Incorrect. Try again!"; resDiv.style.color = "red"; }
+  }
+</script>
+
+</body>
+</html>
