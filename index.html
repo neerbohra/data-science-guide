@@ -3,17 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Data Science IDE Study Guide</title>
+<title>Complete Data Science IDE Study Guide</title>
 <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 <style>
   :root {
-    --bg-main: #0f172a;
-    --bg-sidebar: #1e293b;
-    --bg-editor: #1e1e1e;
-    --bg-output: #f8fafc;
-    --border-color: #334155;
+    --bg-main: #0b0f19;
+    --bg-sidebar: #111827;
+    --bg-card: #1e293b;
+    --bg-editor: #18181b;
+    --bg-output: #090d16;
+    --border: #334155;
     --accent: #38bdf8;
-    --text-light: #f1f5f9;
+    --accent-purple: #a855f7;
+    --accent-green: #10b981;
+    --accent-amber: #f59e0b;
+    --text-main: #f1f5f9;
     --text-muted: #94a3b8;
   }
   * { box-sizing: border-box; }
@@ -22,28 +26,39 @@
     margin: 0;
     display: flex;
     background: var(--bg-main);
-    color: var(--text-light);
+    color: var(--text-main);
     height: 100vh;
     overflow: hidden;
   }
-  /* Sidebar */
+  /* Sidebar Navigation */
   .sidebar {
-    width: 240px;
+    width: 270px;
     background: var(--bg-sidebar);
-    border-right: 1px solid var(--border-color);
-    padding: 20px 12px;
+    border-right: 1px solid var(--border);
+    padding: 20px 14px;
     display: flex;
     flex-direction: column;
     gap: 6px;
+    overflow-y: auto;
+    flex-shrink: 0;
   }
-  .sidebar h2 {
-    font-size: 1rem;
+  .sidebar-title {
+    font-size: 0.95rem;
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 1px;
     color: var(--accent);
-    padding: 0 10px 10px;
-    border-bottom: 1px solid var(--border-color);
-    margin: 0 0 10px 0;
+    padding: 0 10px 12px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+  .sidebar-sub {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    padding: 8px 10px 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 700;
   }
   .nav-btn {
     background: transparent;
@@ -53,246 +68,747 @@
     padding: 10px 12px;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
-  .nav-btn:hover { background: rgba(255,255,255,0.05); color: #fff; }
-  .nav-btn.active { background: rgba(56, 189, 248, 0.15); color: var(--accent); font-weight: 600; }
+  .nav-btn:hover { background: rgba(255,255,255,0.06); color: #fff; }
+  .nav-btn.active {
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent);
+    font-weight: 600;
+    border-left: 3px solid var(--accent);
+  }
+  .badge {
+    font-size: 0.7rem;
+    background: #1e293b;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--text-muted);
+  }
 
-  /* Main Content */
+  /* Main Scrollable Content */
   .main {
     flex: 1;
     overflow-y: auto;
-    padding: 30px 40px;
+    padding: 32px 44px;
+    scroll-behavior: smooth;
   }
-  .section { display: none; max-width: 1200px; margin: 0 auto; }
+  .section { display: none; max-width: 1280px; margin: 0 auto; padding-bottom: 60px; }
   .section.active { display: block; }
-  h1 { margin-top: 0; font-size: 1.8rem; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
-  p.subtitle { color: var(--text-muted); margin-bottom: 25px; }
+  h1 { margin: 0 0 8px 0; font-size: 2rem; color: #fff; }
+  h2 {
+    margin: 36px 0 12px 0;
+    font-size: 1.35rem;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+  p.lead { color: var(--text-muted); font-size: 1rem; margin-bottom: 24px; line-height: 1.5; }
+  p, li { line-height: 1.6; color: #cbd5e1; font-size: 0.95rem; }
+  code.inline {
+    background: #1e293b;
+    color: #38bdf8;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "Fira Code", Consolas, monospace;
+    font-size: 0.86rem;
+  }
 
-  /* IDE Split Container */
-  .ide-card {
-    background: var(--bg-sidebar);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    margin-bottom: 30px;
+  /* Callout Boxes: Pipeline & Comparisons */
+  .pipeline-box {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(56, 189, 248, 0.12));
+    border: 1px solid rgba(168, 85, 247, 0.4);
+    border-left: 4px solid var(--accent-purple);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 20px 0;
+  }
+  .pipeline-title {
+    font-weight: 700;
+    color: #d8b4fe;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 6px;
+  }
+  .tip-box {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    border-left: 4px solid var(--accent-amber);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 0.92rem;
+  }
+
+  /* Comparison Tables */
+  .comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 18px 0 26px 0;
+    background: var(--bg-card);
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    font-size: 0.9rem;
+  }
+  .comp-table th {
+    background: #0f172a;
+    color: var(--accent);
+    text-align: left;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .comp-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .comp-table tr:last-child td { border-bottom: none; }
+
+  /* IDE Split Window */
+  .ide-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin: 18px 0 28px 0;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.35);
   }
   .ide-header {
     background: #020617;
-    padding: 10px 16px;
+    padding: 9px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid var(--border-color);
-    font-size: 0.85rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
     color: var(--text-muted);
+    font-family: monospace;
   }
   .dots { display: flex; gap: 6px; }
-  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
   .dot.red { background: #ef4444; }
   .dot.yellow { background: #eab308; }
   .dot.green { background: #22c55e; }
 
   .ide-split {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    min-height: 220px;
+    grid-template-columns: 1.15fr 0.85fr;
   }
-  @media (max-width: 900px) {
+  @media (max-width: 960px) {
     .ide-split { grid-template-columns: 1fr; }
   }
 
-  /* Left Pane: Code Editor */
   .code-pane {
     background: var(--bg-editor);
     padding: 16px;
-    font-family: "Fira Code", "Consolas", monospace;
-    font-size: 0.88rem;
-    line-height: 1.6;
+    font-family: "Fira Code", Consolas, monospace;
+    font-size: 0.84rem;
+    line-height: 1.55;
     overflow-x: auto;
-    border-right: 1px solid var(--border-color);
+    border-right: 1px solid var(--border);
+    white-space: pre;
+    color: #e4e4e7;
   }
-  .code-line { display: flex; }
-  .ln {
-    color: #64748b;
-    user-select: none;
-    width: 28px;
-    flex-shrink: 0;
-    text-align: right;
-    padding-right: 12px;
-  }
-  /* Syntax Highlighting */
-  .kw { color: #c678dd; } /* keywords: def, import, return */
-  .fn { color: #61afef; } /* functions */
-  .str { color: #98c379; } /* strings */
-  .num { color: #d19a66; } /* numbers */
-  .cmt { color: #7f848e; font-style: italic; } /* comments */
-  .var { color: #e06c75; } /* variables/params */
+  /* Syntax Colors */
+  .kw { color: #c678dd; font-weight: 600; }
+  .fn { color: #61afef; }
+  .str { color: #98c379; }
+  .num { color: #d19a66; }
+  .cmt { color: #7f848e; font-style: italic; }
 
-  /* Right Pane: Output Console */
   .output-pane {
-    background: #0b1120;
+    background: var(--bg-output);
     padding: 16px;
-    font-family: "Consolas", monospace;
-    font-size: 0.85rem;
-    color: #e2e8f0;
+    font-family: Consolas, monospace;
+    font-size: 0.83rem;
+    color: #a7f3d0;
     display: flex;
     flex-direction: column;
+    overflow-x: auto;
   }
-  .output-label {
-    font-size: 0.72rem;
+  .out-tag {
+    font-family: sans-serif;
+    font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    color: #38bdf8;
+    color: var(--accent);
+    font-weight: 700;
     margin-bottom: 10px;
-    font-family: sans-serif;
-    font-weight: bold;
   }
-  .console-text {
+  .console-out {
     white-space: pre-wrap;
     line-height: 1.5;
-    color: #a7f3d0;
   }
-  .df-table {
+  .df-out {
     width: 100%;
     border-collapse: collapse;
     font-family: sans-serif;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     color: #e2e8f0;
-    margin-top: 4px;
   }
-  .df-table th {
+  .df-out th {
     background: #1e293b;
+    padding: 6px 8px;
     text-align: left;
-    padding: 6px 10px;
     border-bottom: 1px solid #475569;
   }
-  .df-table td {
-    padding: 6px 10px;
+  .df-out td {
+    padding: 5px 8px;
     border-bottom: 1px solid #1e293b;
   }
-  .chart-box {
+  .plot-box {
     background: #ffffff;
     border-radius: 6px;
-    padding: 8px;
+    padding: 6px;
     width: 100%;
     min-height: 230px;
   }
+
+  /* Quiz Styling */
+  .quiz-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 18px;
+  }
+  .quiz-opt {
+    display: block;
+    margin: 8px 0;
+    cursor: pointer;
+    color: #e2e8f0;
+  }
+  .quiz-btn {
+    background: var(--accent);
+    color: #0f172a;
+    font-weight: 700;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  .quiz-btn:hover { opacity: 0.9; }
+  .quiz-res { margin-top: 10px; font-weight: 600; font-size: 0.92rem; }
 </style>
 </head>
 <body>
 
 <div class="sidebar">
-  <h2>Data Science IDE</h2>
-  <button class="nav-btn active" onclick="showTab('functions', this)">1. Python Functions</button>
-  <button class="nav-btn" onclick="showTab('numpy', this)">2. NumPy Arrays</button>
-  <button class="nav-btn" onclick="showTab('pandas', this)">3. Pandas DataFrames</button>
-  <button class="nav-btn" onclick="showTab('matplotlib', this)">4. Matplotlib</button>
-  <button class="nav-btn" onclick="showTab('seaborn', this)">5. Seaborn</button>
-  <button class="nav-btn" onclick="showTab('plotly', this)">6. Plotly Express</button>
+  <div class="sidebar-title">Data Science Master IDE</div>
+  <div class="sidebar-sub">Core Foundations</div>
+  <button class="nav-btn active" onclick="openTab('tab-arch', this)">0. How All 4 Decks Connect <span class="badge">Map</span></button>
+  <button class="nav-btn" onclick="openTab('tab-func', this)">1. Python Functions <span class="badge">Deck 1</span></button>
+  <button class="nav-btn" onclick="openTab('tab-np', this)">2A. NumPy Arrays <span class="badge">Deck 2</span></button>
+  <button class="nav-btn" onclick="openTab('tab-pd', this)">2B. Pandas DataFrames <span class="badge">Deck 2</span></button>
+  <div class="sidebar-sub">Stats & Visualization</div>
+  <button class="nav-btn" onclick="openTab('tab-mpl', this)">3. Matplotlib Pyplot <span class="badge">Deck 3</span></button>
+  <button class="nav-btn" onclick="openTab('tab-eda', this)">4A. Descriptive Stats & EDA <span class="badge">Deck 4</span></button>
+  <button class="nav-btn" onclick="openTab('tab-sns', this)">4B. Seaborn (catplot/KDE) <span class="badge">Deck 4</span></button>
+  <button class="nav-btn" onclick="openTab('tab-px', this)">4C. Plotly Express <span class="badge">Deck 4</span></button>
+  <div class="sidebar-sub">Self-Testing</div>
+  <button class="nav-btn" onclick="openTab('tab-quiz', this)">5. Practice Exam Quiz <span class="badge">8 Qs</span></button>
 </div>
 
 <div class="main">
 
-  <!-- 1. FUNCTIONS -->
-  <div id="functions" class="section active">
-    <h1>Python Functions & Lambda</h1>
-    <p class="subtitle">Reusable code blocks, *args/**kwargs unpacking, and one-line anonymous functions.</p>
+  <!-- ==================== TAB 0: ARCHITECTURE & CONNECTIONS ==================== -->
+  <div id="tab-arch" class="section active">
+    <h1>How Decks 1, 2, 3, and 4 Work Together</h1>
+    <p class="lead">Before memorizing syntax, understand the exact data science pipeline connecting all four of Dr. Abebe's lectures so you know <strong>why</strong> each tool exists and <strong>when</strong> to combine them.</p>
+
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Layer / Deck</th>
+          <th>Primary Role</th>
+          <th>Input → Output</th>
+          <th>How It Connects to Other Decks</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Deck 1: Python Functions</strong><br><code class="inline">def</code>, <code class="inline">*args</code>, <code class="inline">**kwargs</code>, <code class="inline">lambda</code></td>
+          <td>Reusable logic & automation (DRY: Don't Repeat Yourself).</td>
+          <td>Raw inputs/parameters → Returned values or transformed objects.</td>
+          <td><strong>1 + 2 → 3 & 4:</strong> Wrap Pandas cleaning steps or Matplotlib/Seaborn chart templates into a <code class="inline">def</code> function; pass <code class="inline">lambda</code> inside Pandas <code class="inline">.apply()</code>; forward styling options via <code class="inline">**kwargs</code>.</td>
+        </tr>
+        <tr>
+          <td><strong>Deck 2A: NumPy</strong><br><code class="inline">ndarray</code>, <code class="inline">@</code>, <code class="inline">linspace</code></td>
+          <td>Fast vectorized numerical math, matrices, & random simulations.</td>
+          <td>Lists/ranges → Homogeneous N-dimensional numeric arrays.</td>
+          <td><strong>2A → 2B & 3:</strong> Pandas DataFrames are built on top of NumPy arrays. Matplotlib (<code class="inline">plt.plot</code>, <code class="inline">plt.hist</code>) natively consumes NumPy arrays.</td>
+        </tr>
+        <tr>
+          <td><strong>Deck 2B: Pandas</strong><br><code class="inline">Series</code>, <code class="inline">DataFrame</code></td>
+          <td>Loading, inspecting, filtering, cleaning, & grouping labeled tables.</td>
+          <td>CSV/Excel files → Cleaned, feature-engineered <code class="inline">df</code>.</td>
+          <td><strong>2B → 4A, 4B, 4C:</strong> Seaborn (<code class="inline">sns.catplot</code>, <code class="inline">sns.kdeplot</code>) and Plotly (<code class="inline">px.scatter</code>, <code class="inline">px.bar</code>) directly read Pandas column names via <code class="inline">data=df</code>.</td>
+        </tr>
+        <tr>
+          <td><strong>Deck 3: Matplotlib</strong><br><code class="inline">matplotlib.pyplot as plt</code></td>
+          <td>Low-level, step-by-step static plotting engine (MATLAB-style).</td>
+          <td>NumPy arrays / Series → Static PNG/JPG figures.</td>
+          <td><strong>3 powers 4B:</strong> Seaborn is built directly on Matplotlib! You use <code class="inline">plt.title()</code>, <code class="inline">plt.xlabel()</code>, <code class="inline">plt.savefig()</code>, and <code class="inline">plt.show()</code> to finish Seaborn plots.</td>
+        </tr>
+        <tr>
+          <td><strong>Deck 4: Stats, Seaborn & Plotly</strong><br><code class="inline">sns</code> & <code class="inline">px</code></td>
+          <td>Statistical analysis (EDA), multi-panel grids, & interactive web charts.</td>
+          <td>Cleaned DataFrame → Statistical insights & interactive HTML dashboards.</td>
+          <td><strong>4B vs 4C:</strong> Use <strong>Seaborn</strong> for quick statistical distributions & multi-facet grids; use <strong>Plotly Express</strong> for interactive hover/zoom web exploration (<code class="inline">.write_html()</code>).</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>End-to-End Integration Example: Combining Decks 1 + 2 + 3 + 4</h2>
+    <p>Notice how a real project combines <strong>Deck 1</strong> (a reusable function with <code class="inline">**kwargs</code> and type hints), <strong>Deck 2</strong> (Pandas filtering/binning + NumPy), and <strong>Deck 3 & 4</strong> (Seaborn plotting + Matplotlib saving):</p>
 
     <div class="ide-card">
       <div class="ide-header">
         <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
-        <span>functions_demo.py</span>
+        <span>full_pipeline_integration.py (Decks 1 + 2 + 3 + 4 Combined)</span>
       </div>
       <div class="ide-split">
-        <div class="code-pane">
-          <div class="code-line"><span class="ln">1</span><span><span class="cmt"># Function with default parameter & multiple returns</span></span></div>
-          <div class="code-line"><span class="ln">2</span><span><span class="kw">def</span> <span class="fn">min_max</span>(numbers, scale=<span class="num">1</span>):</span></div>
-          <div class="code-line"><span class="ln">3</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="fn">min</span>(numbers) * scale, <span class="fn">max</span>(numbers) * scale</span></div>
-          <div class="code-line"><span class="ln">4</span><span></span></div>
-          <div class="code-line"><span class="ln">5</span><span>low, high = <span class="fn">min_max</span>([<span class="num">4</span>, <span class="num">9</span>, <span class="num">1</span>, <span class="num">7</span>], scale=<span class="num">10</span>)</span></div>
-          <div class="code-line"><span class="ln">6</span><span><span class="fn">print</span>(<span class="str">f"Low: {low}, High: {high}"</span>)</span></div>
-          <div class="code-line"><span class="ln">7</span><span></span></div>
-          <div class="code-line"><span class="ln">8</span><span><span class="cmt"># Lambda (anonymous) function</span></span></div>
-          <div class="code-line"><span class="ln">9</span><span>square = <span class="kw">lambda</span> x: x ** <span class="num">2</span></span></div>
-          <div class="code-line"><span class="ln">10</span><span><span class="fn">print</span>(<span class="str">"5 squared:"</span>, <span class="fn">square</span>(<span class="num">5</span>))</span></div>
-        </div>
+        <div class="code-pane"><span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> seaborn <span class="kw">as</span> sns
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+
+<span class="cmt"># DECK 1: Reusable function with type hints & **kwargs</span>
+<span class="kw">def</span> <span class="fn">plot_group_summary</span>(df: pd.DataFrame, x_col: str, y_col: str, **plot_kwargs):
+    <span class="str">"""Clean missing rows (Deck 2) and plot a Seaborn figure (Deck 4 + 3)."""</span>
+    clean_df = df.<span class="fn">dropna</span>(subset=[x_col, y_col]).<span class="fn">copy</span>()  <span class="cmt"># Deck 2: Pandas</span>
+    sns.<span class="fn">catplot</span>(data=clean_df, x=x_col, y=y_col, **plot_kwargs) <span class="cmt"># Deck 1 unpacking + Deck 4</span>
+    plt.<span class="fn">title</span>(<span class="str">f"{y_col} by {x_col}"</span>)                      <span class="cmt"># Deck 3: Matplotlib</span>
+    plt.<span class="fn">show</span>()
+
+<span class="cmt"># Calling the function forwards kind='bar' and hue='Sex' via **kwargs</span>
+<span class="fn">plot_group_summary</span>(titanic_df, <span class="str">"Pclass"</span>, <span class="str">"Survived"</span>, kind=<span class="str">"bar"</span>, hue=<span class="str">"Sex"</span>)</div>
         <div class="output-pane">
-          <div class="output-label">Terminal Output</div>
-          <div class="console-text">Low: 10, High: 90
-5 squared: 25</div>
+          <div class="out-tag">How Each Deck Contributes</div>
+          <div class="console-out">1. Deck 1 (def + **kwargs): Lets you pass ANY Seaborn parameter (kind, hue, palette) without rewriting the function.
+2. Deck 2 (dropna + copy): Safely removes NaNs before plotting so calculations don't break.
+3. Deck 4 (sns.catplot): Automatically groups by Pclass & Sex and computes mean survival + error bars.
+4. Deck 3 (plt.title / plt.show): Adds the final title and renders the figure on screen.</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 2. NUMPY -->
-  <div id="numpy" class="section">
-    <h1>NumPy: Numerical Arrays</h1>
-    <p class="subtitle">Vectorized math without loops using the core <code>ndarray</code> object.</p>
+  <!-- ==================== TAB 1: PYTHON FUNCTIONS ==================== -->
+  <div id="tab-func" class="section">
+    <h1>Deck 1: Python Functions</h1>
+    <p class="lead">Complete syntax reference from Dr. Abebe's <em>Python Functions</em> lecture: definitions, parameters vs. arguments, <code class="inline">*args</code>/<code class="inline">**kwargs</code>, unpacking, <code class="inline">return</code> vs. <code class="inline">print</code>, scope (LEGB), and <code class="inline">lambda</code>.</p>
+
+    <div class="pipeline-box">
+      <div class="pipeline-title">How Deck 1 Connects to Decks 2, 3, and 4</div>
+      <ul>
+        <li><strong>With Deck 2 (Pandas/NumPy):</strong> Custom functions and <code class="inline">lambda</code> expressions are passed directly into <code class="inline">df["col"].apply(lambda x: ...)</code> for custom feature engineering, or used to encapsulate repetitive data-cleaning pipelines (<code class="inline">def clean_titanic(df): ... return df_clean</code>).</li>
+        <li><strong>With Decks 3 & 4 (Matplotlib/Seaborn/Plotly):</strong> Library functions like <code class="inline">plt.plot(x, y, **kwargs)</code> and <code class="inline">sns.catplot(..., **kwargs)</code> rely heavily on <strong>keyword arguments</strong> and <strong>default parameters</strong>. Understanding <code class="inline">**kwargs</code> lets you write your own wrapper functions that forward styling options directly to Matplotlib or Seaborn.</li>
+      </ul>
+    </div>
+
+    <h2>1.1 Defining, Calling, Docstrings, & Parameters vs. Arguments</h2>
+    <ul>
+      <li><strong>Parameter vs. Argument:</strong> A <strong>parameter</strong> is the variable placeholder in the function definition (<code class="inline">def greet(name):</code>). An <strong>argument</strong> is the actual value passed at call time (<code class="inline">greet("Emil")</code>).</li>
+      <li><strong>Object vs. Call:</strong> Writing <code class="inline">my_function</code> without parentheses references the function object; <code class="inline">my_function()</code> executes it.</li>
+      <li><strong>Default Parameters:</strong> Parameters with defaults (e.g., <code class="inline">country="Norway"</code>) <strong>must come after</strong> parameters without defaults. Never use mutable objects (like <code class="inline">[]</code>) as default values; use <code class="inline">None</code> instead.</li>
+    </ul>
 
     <div class="ide-card">
       <div class="ide-header">
         <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
-        <span>numpy_vectors.py</span>
+        <span>1_basics_docstrings_defaults.py</span>
       </div>
       <div class="ide-split">
-        <div class="code-pane">
-          <div class="code-line"><span class="ln">1</span><span><span class="kw">import</span> numpy <span class="kw">as</span> np</span></div>
-          <div class="code-line"><span class="ln">2</span><span></span></div>
-          <div class="code-line"><span class="ln">3</span><span><span class="cmt"># Evenly spaced points & vectorized math</span></span></div>
-          <div class="code-line"><span class="ln">4</span><span>x = np.<span class="fn">linspace</span>(<span class="num">0</span>, <span class="num">1</span>, <span class="num">5</span>)</span></div>
-          <div class="code-line"><span class="ln">5</span><span><span class="fn">print</span>(<span class="str">"Linspace:"</span>, x)</span></div>
-          <div class="code-line"><span class="ln">6</span><span></span></div>
-          <div class="code-line"><span class="ln">7</span><span><span class="cmt"># Boolean filtering & statistics</span></span></div>
-          <div class="code-line"><span class="ln">8</span><span>scores = np.<span class="fn">array</span>([<span class="num">85</span>, <span class="num">92</span>, <span class="num">78</span>, <span class="num">95</span>])</span></div>
-          <div class="code-line"><span class="ln">9</span><span><span class="fn">print</span>(<span class="str">"Above 88:"</span>, scores[scores > <span class="num">88</span>])</span></div>
-          <div class="code-line"><span class="ln">10</span><span><span class="fn">print</span>(<span class="str">"Mean:"</span>, np.<span class="fn">mean</span>(scores))</span></div>
-        </div>
+        <div class="code-pane"><span class="kw">def</span> <span class="fn">area</span>(w: float, h: float = <span class="num">1.0</span>) -> float:
+    <span class="str">"""Return the area of a rectangle."""</span>
+    <span class="kw">return</span> w * h
+
+<span class="fn">print</span>(area.__doc__)          <span class="cmt"># Access docstring</span>
+<span class="fn">print</span>(<span class="fn">area</span>(<span class="num">5</span>, <span class="num">3</span>))            <span class="cmt"># Positional arguments</span>
+<span class="fn">print</span>(<span class="fn">area</span>(<span class="num">5</span>))               <span class="cmt"># Uses default h=1.0</span>
+<span class="fn">print</span>(<span class="fn">area</span>(h=<span class="num">4</span>, w=<span class="num">2</span>))        <span class="cmt"># Keyword arguments (order doesn't matter)</span>
+
+<span class="kw">def</span> <span class="fn">work_in_progress</span>():
+    <span class="kw">pass</span>                     <span class="cmt"># Avoids IndentationError for empty body</span></div>
         <div class="output-pane">
-          <div class="output-label">Terminal Output</div>
-          <div class="console-text">Linspace: [0.   0.25 0.5  0.75 1.  ]
-Above 88: [92 95]
-Mean: 87.5</div>
+          <div class="out-tag">Terminal Output</div>
+          <div class="console-out">Return the area of a rectangle.
+15
+5.0
+8</div>
+        </div>
+      </div>
+    </div>
+
+    <h2>1.2 *args, **kwargs, Call Unpacking, & The Argument Order Rule</h2>
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Syntax</th>
+          <th>Data Structure Created</th>
+          <th>When to Use</th>
+          <th>Opposite Operation (At Call Time)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code class="inline">*args</code> (in <code class="inline">def</code>)</td>
+          <td><strong>Tuple</strong> <code class="inline">(val1, val2, ...)</code></td>
+          <td>Unknown number of <strong>positional</strong> arguments. Access by index (<code class="inline">args[0]</code>).</td>
+          <td><code class="inline">func(*my_list)</code> unpacks a list/tuple into separate positional arguments.</td>
+        </tr>
+        <tr>
+          <td><code class="inline">**kwargs</code> (in <code class="inline">def</code>)</td>
+          <td><strong>Dictionary</strong> <code class="inline">{'k': v}</code></td>
+          <td>Unknown number of <strong>keyword</strong> arguments. Access by key (<code class="inline">kwargs['lname']</code>).</td>
+          <td><code class="inline">func(**my_dict)</code> unpacks a dict into separate <code class="inline">key=value</code> arguments.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip-box">
+      <strong>Strict Python Argument Order Rule:</strong> When combining parameter types in one function definition, Python requires this exact sequence:<br>
+      <code class="inline">positional → *args → keyword-only (after *args) → **kwargs</code>
+    </div>
+
+    <div class="ide-card">
+      <div class="ide-header">
+        <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+        <span>2_args_kwargs_unpacking.py</span>
+      </div>
+      <div class="ide-split">
+        <div class="code-pane"><span class="cmt"># 1. Argument Order Rule demonstration</span>
+<span class="kw">def</span> <span class="fn">demo</span>(a, b=<span class="num">2</span>, *args, c=<span class="num">3</span>, **kwargs):
+    <span class="fn">print</span>(<span class="str">"a:"</span>, a, <span class="str">"| b:"</span>, b, <span class="str">"| args:"</span>, args, <span class="str">"| c:"</span>, c, <span class="str">"| kwargs:"</span>, kwargs)
+
+<span class="fn">demo</span>(<span class="num">1</span>, <span class="num">5</span>, <span class="num">6</span>, <span class="num">7</span>, c=<span class="num">9</span>, x=<span class="num">10</span>, y=<span class="num">11</span>)
+
+<span class="cmt"># 2. Unpacking a list (*) and dictionary (**) into a call</span>
+<span class="kw">def</span> <span class="fn">add</span>(a, b, c):
+    <span class="kw">return</span> a + b + c
+
+nums = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>]
+values = {<span class="str">"a"</span>: <span class="num">10</span>, <span class="str">"b"</span>: <span class="num">20</span>, <span class="str">"c"</span>: <span class="num">30</span>}
+<span class="fn">print</span>(<span class="str">"Unpacked list:"</span>, <span class="fn">add</span>(*nums))
+<span class="fn">print</span>(<span class="str">"Unpacked dict:"</span>, <span class="fn">add</span>(**values))</div>
+        <div class="output-pane">
+          <div class="out-tag">Terminal Output</div>
+          <div class="console-out">a: 1 | b: 5 | args: (6, 7) | c: 9 | kwargs: {'x': 10, 'y': 11}
+Unpacked list: 6
+Unpacked dict: 60</div>
+        </div>
+      </div>
+    </div>
+
+    <h2>1.3 print vs. return, Multiple Return Values, Scope (LEGB), & Lambda</h2>
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th><code class="inline">print(value)</code></th>
+          <th><code class="inline">return value</code></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Effect</strong></td>
+          <td>Displays text on the screen for humans; function hands back <code class="inline">None</code>.</td>
+          <td>Exits the function immediately and hands the value back to the caller so it can be saved in a variable or used in math.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="ide-card">
+      <div class="ide-header">
+        <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+        <span>3_return_scope_lambda.py</span>
+      </div>
+      <div class="ide-split">
+        <div class="code-pane"><span class="cmt"># Multiple return values (packed as tuple, unpacked on left)</span>
+<span class="kw">def</span> <span class="fn">min_max</span>(numbers):
+    <span class="kw">return</span> <span class="fn">min</span>(numbers), <span class="fn">max</span>(numbers)
+
+low, high = <span class="fn">min_max</span>([<span class="num">4</span>, <span class="num">9</span>, <span class="num">1</span>, <span class="num">7</span>])
+<span class="fn">print</span>(<span class="str">f"Unpacked -> low: {low}, high: {high}"</span>)
+
+<span class="cmt"># LEGB Scope (Local -> Enclosing -> Global -> Built-in)</span>
+x = <span class="str">"global"</span>
+<span class="kw">def</span> <span class="fn">outer</span>():
+    x = <span class="str">"enclosing"</span>
+    <span class="kw">def</span> <span class="fn">inner</span>():
+        <span class="kw">nonlocal</span> x
+        x = <span class="str">"modified enclosing"</span>
+    <span class="fn">inner</span>()
+    <span class="kw">return</span> x
+
+<span class="fn">print</span>(<span class="str">"Outer x:"</span>, <span class="fn">outer</span>(), <span class="str">"| Global x:"</span>, x)
+
+<span class="cmt"># Lambda: single-expression anonymous function</span>
+square = <span class="kw">lambda</span> n: n ** <span class="num">2</span>
+<span class="fn">print</span>(<span class="str">"Lambda square(6):"</span>, <span class="fn">square</span>(<span class="num">6</span>))</div>
+        <div class="output-pane">
+          <div class="out-tag">Terminal Output</div>
+          <div class="console-out">Unpacked -> low: 1, high: 9
+Outer x: modified enclosing | Global x: global
+Lambda square(6): 36</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 3. PANDAS -->
-  <div id="pandas" class="section">
-    <h1>Pandas: Tabular Data & EDA</h1>
-    <p class="subtitle">Filtering, creating columns, and grouping DataFrames.</p>
+  <!-- ==================== TAB 2A: NUMPY ==================== -->
+  <div id="tab-np" class="section">
+    <h1>Deck 2A: NumPy (Numerical Python)</h1>
+    <p class="lead">Complete syntax for N-dimensional arrays (<code class="inline">ndarray</code>), sequence generators, vectorized math, matrix algebra (<code class="inline">@</code>), reshaping, boolean masking, and random distributions.</p>
+
+    <div class="pipeline-box">
+      <div class="pipeline-title">How NumPy Connects to Pandas (2B) & Visualization (Decks 3 & 4)</div>
+      <ul>
+        <li><strong>NumPy → Pandas:</strong> Every column in a Pandas DataFrame is backed by a NumPy array. NumPy functions like <code class="inline">np.log()</code>, <code class="inline">np.sqrt()</code>, and <code class="inline">np.mean()</code> work directly on Pandas columns.</li>
+        <li><strong>NumPy → Matplotlib (Deck 3):</strong> To plot smooth mathematical curves like $y = x^2 + 2x + 1$, generate the domain with <code class="inline">x = np.linspace(-5, 5, 100)</code> and pass <code class="inline">plt.plot(x, y)</code>.</li>
+      </ul>
+    </div>
+
+    <h2>2A.1 Array Creation, Inspection Properties, & arange vs. linspace</h2>
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Function</th>
+          <th>Syntax</th>
+          <th>How It Works</th>
+          <th>Best Use Case</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code class="inline">np.arange()</code></td>
+          <td><code class="inline">np.arange(start, stop, step)</code></td>
+          <td>Generates numbers from <code class="inline">start</code> up to (but <strong>excluding</strong>) <code class="inline">stop</code> by a fixed <code class="inline">step</code>.</td>
+          <td>Integer sequences or index grids (e.g., <code class="inline">np.arange(0, 10, 2)</code> → <code class="inline">[0, 2, 4, 6, 8]</code>).</td>
+        </tr>
+        <tr>
+          <td><code class="inline">np.linspace()</code></td>
+          <td><code class="inline">np.linspace(start, stop, num)</code></td>
+          <td>Generates an exact count (<code class="inline">num</code>) of evenly spaced points, <strong>including</strong> both endpoints.</td>
+          <td>Continuous math functions, plotting smooth curves, and differential equations.</td>
+        </tr>
+      </tbody>
+    </table>
 
     <div class="ide-card">
       <div class="ide-header">
         <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
-        <span>pandas_eda.ipynb</span>
+        <span>numpy_creation_inspection.py</span>
       </div>
       <div class="ide-split">
-        <div class="code-pane">
-          <div class="code-line"><span class="ln">1</span><span><span class="kw">import</span> pandas <span class="kw">as</span> pd</span></div>
-          <div class="code-line"><span class="ln">2</span><span></span></div>
-          <div class="code-line"><span class="ln">3</span><span>df = pd.<span class="fn">DataFrame</span>({</span></div>
-          <div class="code-line"><span class="ln">4</span><span>&nbsp;&nbsp;<span class="str">"Name"</span>: [<span class="str">"Olivia"</span>, <span class="str">"Dylan"</span>, <span class="str">"Henry"</span>],</span></div>
-          <div class="code-line"><span class="ln">5</span><span>&nbsp;&nbsp;<span class="str">"Age"</span>: [<span class="num">20</span>, <span class="num">22</span>, <span class="num">25</span>],</span></div>
-          <div class="code-line"><span class="ln">6</span><span>&nbsp;&nbsp;<span class="str">"Major"</span>: [<span class="str">"Math"</span>, <span class="str">"CS"</span>, <span class="str">"Physics"</span>]</span></div>
-          <div class="code-line"><span class="ln">7</span><span>})</span></div>
-          <div class="code-line"><span class="ln">8</span><span></span></div>
-          <div class="code-line"><span class="ln">9</span><span><span class="cmt"># Filter rows where Age > 20</span></span></div>
-          <div class="code-line"><span class="ln">10</span><span>df[df[<span class="str">"Age"</span>] > <span class="num">20</span>]</span></div>
-        </div>
+        <div class="code-pane"><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+A = np.<span class="fn">array</span>([[<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>],
+              [<span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>]])
+
+<span class="fn">print</span>(<span class="str">"ndim:"</span>, A.ndim, <span class="str">"| shape:"</span>, A.shape, <span class="str">"| size:"</span>, A.size, <span class="str">"| dtype:"</span>, A.dtype)
+<span class="fn">print</span>(<span class="str">"Zeros (2x3):\n"</span>, np.<span class="fn">zeros</span>((<span class="num">2</span>, <span class="num">3</span>)))
+<span class="fn">print</span>(<span class="str">"arange(0, 10, 2):"</span>, np.<span class="fn">arange</span>(<span class="num">0</span>, <span class="num">10</span>, <span class="num">2</span>))
+<span class="fn">print</span>(<span class="str">"linspace(0, 1, 5):"</span>, np.<span class="fn">linspace</span>(<span class="num">0</span>, <span class="num">1</span>, <span class="num">5</span>))</div>
         <div class="output-pane">
-          <div class="output-label">DataFrame Output</div>
-          <table class="df-table">
-            <thead>
-              <tr><th>Index</th><th>Name</th><th>Age</th><th>Major</th></tr>
-            </thead>
+          <div class="out-tag">Terminal Output</div>
+          <div class="console-out">ndim: 2 | shape: (2, 3) | size: 6 | dtype: int64
+Zeros (2x3):
+ [[0. 0. 0.]
+ [0. 0. 0.]]
+arange(0, 10, 2): [0 2 4 6 8]
+linspace(0, 1, 5): [0.   0.25 0.5  0.75 1.  ]</div>
+        </div>
+      </div>
+    </div>
+
+    <h2>2A.2 Vectorized Math, Element-Wise (*) vs. Matrix Multiplication (@), & Slicing</h2>
+    <div class="ide-card">
+      <div class="ide-header">
+        <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+        <span>numpy_math_matrices.py</span>
+      </div>
+      <div class="ide-split">
+        <div class="code-pane"><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cmt"># 2D Slicing: A[row, col]</span>
+A = np.<span class="fn">array</span>([[<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>], [<span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>]])
+<span class="fn">print</span>(<span class="str">"Row 0:"</span>, A[<span class="num">0</span>, :], <span class="str">"| Col 1:"</span>, A[:, <span class="num">1</span>])
+<span class="fn">print</span>(<span class="str">"Transpose A.T shape:"</span>, A.T.shape)
+
+<span class="cmt"># Reshaping 1D -> 2D (total elements must match: 12 = 3x4)</span>
+grid = np.<span class="fn">arange</span>(<span class="num">12</span>).<span class="fn">reshape</span>(<span class="num">3</span>, <span class="num">4</span>)
+
+<span class="cmt"># Element-wise (*) vs Matrix Multiplication (@)</span>
+M1 = np.<span class="fn">array</span>([[<span class="num">1</span>, <span class="num">2</span>], [<span class="num">3</span>, <span class="num">4</span>]])
+M2 = np.<span class="fn">array</span>([[<span class="num">5</span>, <span class="num">6</span>], [<span class="num">7</span>, <span class="num">8</span>]])
+<span class="fn">print</span>(<span class="str">"Element-wise M1 * M2:\n"</span>, M1 * M2)
+<span class="fn">print</span>(<span class="str">"Matrix product M1 @ M2:\n"</span>, M1 @ M2)</div>
+        <div class="output-pane">
+          <div class="out-tag">Terminal Output</div>
+          <div class="console-out">Row 0: [1 2 3] | Col 1: [2 5]
+Transpose A.T shape: (3, 2)
+Element-wise M1 * M2:
+ [[ 5 12]
+ [21 32]]
+Matrix product M1 @ M2:
+ [[19 22]
+ [43 50]]</div>
+        </div>
+      </div>
+    </div>
+
+    <h2>2A.3 Universal Functions, Boolean Indexing, Combining, & Random Numbers</h2>
+    <div class="ide-card">
+      <div class="ide-header">
+        <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+        <span>numpy_stats_boolean_random.py</span>
+      </div>
+      <div class="ide-split">
+        <div class="code-pane"><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+x = np.<span class="fn">array</span>([<span class="num">1</span>, <span class="num">5</span>, <span class="num">10</span>, <span class="num">15</span>, <span class="num">20</span>, <span class="num">20</span>])
+<span class="fn">print</span>(<span class="str">"Boolean filter (x > 10):"</span>, x[x > <span class="num">10</span>])
+<span class="fn">print</span>(<span class="str">"Unique sorted:"</span>, np.<span class="fn">unique</span>(x))
+<span class="fn">print</span>(<span class="str">"Mean / Std:"</span>, np.<span class="fn">mean</span>(x), <span class="str">"/"</span>, <span class="fn">round</span>(np.<span class="fn">std</span>(x), <span class="num">2</span>))
+
+<span class="cmt"># Concatenation & Math functions</span>
+z = np.<span class="fn">concatenate</span>([np.<span class="fn">array</span>([<span class="num">1</span>, <span class="num">4</span>]), np.<span class="fn">array</span>([<span class="num">9</span>, <span class="num">16</span>])])
+<span class="fn">print</span>(<span class="str">"sqrt(z):"</span>, np.<span class="fn">sqrt</span>(z))
+
+<span class="cmt"># Random generators</span>
+u = np.random.<span class="fn">rand</span>(<span class="num">3</span>)          <span class="cmt"># Uniform [0, 1)</span>
+n = np.random.<span class="fn">randn</span>(<span class="num">3</span>)         <span class="cmt"># Standard Normal (mean=0, std=1)</span>
+r = np.random.<span class="fn">randint</span>(<span class="num">1</span>, <span class="num">100</span>, <span class="num">4</span>) <span class="cmt"># 4 random ints in [1, 100)</span>
+<span class="fn">print</span>(<span class="str">"Random ints:"</span>, r)</div>
+        <div class="output-pane">
+          <div class="out-tag">Terminal Output</div>
+          <div class="console-out">Boolean filter (x > 10): [15 20 20]
+Unique sorted: [ 1  5 10 15 20]
+Mean / Std: 11.833333333333334 / 7.06
+sqrt(z): [1. 2. 3. 4.]
+Random ints: [42 87 14 63]</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 2B: PANDAS ==================== -->
+  <div id="tab-pd" class="section">
+    <h1>Deck 2B: Pandas (Tabular Data & Wrangling)</h1>
+    <p class="lead">Complete syntax for <code class="inline">Series</code>, <code class="inline">DataFrame</code>, inspection, <code class="inline">.loc[]</code> vs <code class="inline">.iloc[]</code>, multi-condition filtering (<code class="inline">&amp;</code>, <code class="inline">|</code>), <code class="inline">.groupby().agg()</code>, missing data (<code class="inline">isna</code>/<code class="inline">dropna</code>/<code class="inline">fillna</code>), and CSV/Excel I/O.</p>
+
+    <div class="pipeline-box">
+      <div class="pipeline-title">How Pandas Connects to Deck 4 (EDA, Seaborn, & Plotly)</div>
+      <p>Every chart in <strong>Deck 4</strong> begins with a Pandas workflow: <code class="inline">pd.read_csv()</code> → <code class="inline">df.isnull().sum()</code> → <code class="inline">df.fillna()</code> / <code class="inline">df.dropna()</code> → feature creation (<code class="inline">df["FamilySize"] = ...</code> or <code class="inline">pd.cut()</code>) → passing <code class="inline">data=df_filtered</code> into <code class="inline">sns.catplot()</code> or <code class="inline">px.scatter()</code>.</p>
+    </div>
+
+    <h2>2B.1 Series, DataFrame, Inspection, & .loc[] vs .iloc[]</h2>
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Indexer</th>
+          <th>Lookup Method</th>
+          <th>Single Cell Example</th>
+          <th>Slice Behavior</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code class="inline">df.loc[row_label, col_label]</code></td>
+          <td><strong>Label-based</strong> (uses index names & column string names).</td>
+          <td><code class="inline">df.loc[0, "Name"]</code></td>
+          <td>End label is <strong>inclusive</strong> (<code class="inline">df.loc[0:2]</code> returns rows 0, 1, and 2).</td>
+        </tr>
+        <tr>
+          <td><code class="inline">df.iloc[row_pos, col_pos]</code></td>
+          <td><strong>Integer position-based</strong> (0-indexed like NumPy/lists).</td>
+          <td><code class="inline">df.iloc[0, 0]</code></td>
+          <td>End position is <strong>exclusive</strong> (<code class="inline">df.iloc[0:2]</code> returns rows 0 and 1).</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="ide-card">
+      <div class="ide-header">
+        <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+        <span>pandas_structures_selection.py</span>
+      </div>
+      <div class="ide-split">
+        <div class="code-pane"><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cmt"># 1D Series with custom index labels</span>
+ages = pd.<span class="fn">Series</span>([<span class="num">20</span>, <span class="num">22</span>, <span class="num">19</span>], index=[<span class="str">"Miles"</span>, <span class="str">"Shrjan"</span>, <span class="str">"Mason"</span>])
+
+<span class="cmt"># 2D DataFrame from dictionary</span>
+df = pd.<span class="fn">DataFrame</span>({
+    <span class="str">"Name"</span>: [<span class="str">"Olivia"</span>, <span class="str">"Dylan"</span>, <span class="str">"Chelsea"</span>, <span class="str">"Henry"</span>],
+    <span class="str">"Age"</span>: [<span class="num">20</span>, <span class="num">22</span>, <span class="num">19</span>, <span class="num">25</span>],
+    <span class="str">"Major"</span>: [<span class="str">"Math"</span>, <span class="str">"CS"</span>, <span class="str">"Biology"</span>, <span class="str">"Physics"</span>]
+})
+
+<span class="fn">print</span>(<span class="str">"Shape:"</span>, df.shape, <span class="str">"| Columns:"</span>, df.columns.<span class="fn">tolist</span>())
+<span class="fn">print</span>(<span class="str">"loc cell:"</span>, df.<span class="fn">loc</span>[<span class="num">0</span>, <span class="str">"Name"</span>], <span class="str">"| iloc cell:"</span>, df.<span class="fn">iloc</span>[<span class="num">0</span>, <span class="num">0</span>])
+
+<span class="cmt"># Single bracket = Series | Double brackets = DataFrame</span>
+subset = df[[<span class="str">"Name"</span>, <span class="str">"Major"</span>]].<span class="fn">head</span>(<span class="num">2</span>)</div>
+        <div class="output-pane">
+          <div class="out-tag">Console & DataFrame Output</div>
+          <div class="console-out">Shape: (4, 3) | Columns: ['Name', 'Age', 'Major']
+loc cell: Olivia | iloc cell: Olivia</div>
+          <br>
+          <table class="df-out">
+            <thead><tr><th></th><th>Name</th><th>Major</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td>Dylan</td><td>22</td><td>CS</td></tr>
-              <tr><td>2</td><td>Henry</td><td>25</td><td>Physics</td></tr>
+              <tr><td>0</td><td>Olivia</td><td>Math</td></tr>
+              <tr><td>1</td><td>Dylan</td><td>CS</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <h2>2B.2 Multi-Condition Filtering, Sorting, Column Edits, & GroupBy</h2>
+    <div class="tip-box">
+      <strong>Multi-Condition Filtering Rule:</strong> Never use Python's <code class="inline">and</code> / <code class="inline">or</code> keywords on Pandas columns. Always use bitwise <code class="inline">&amp;</code> (AND) or <code class="inline">|</code> (OR) and wrap <strong>every condition in parentheses</strong>: <code class="inline">df[(cond1) &amp; (cond2)]</code>.
+    </div>
+
+    <div class="ide-card">
+      <div class="ide-header">
+        <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+        <span>pandas_filter_groupby_clean.py</span>
+      </div>
+      <div class="ide-split">
+        <div class="code-pane"><span class="cmt"># Multi-condition boolean filtering</span>
+filtered = df[(df[<span class="str">"Age"</span>] > <span class="num">20</span>) & (df[<span class="str">"Major"</span>] == <span class="str">"Physics"</span>)]
+
+<span class="cmt"># Vectorized new column, rename, drop, sort</span>
+df[<span class="str">"Age_Next_Year"</span>] = df[<span class="str">"Age"</span>] + <span class="num">1</span>
+df_sorted = df.<span class="fn">sort_values</span>(<span class="str">"Age"</span>, ascending=<span class="kw">False</span>)
+df_renamed = df.<span class="fn">rename</span>(columns={<span class="str">"Name"</span>: <span class="str">"Student_Name"</span>})
+df_dropped = df.<span class="fn">drop</span>(columns=[<span class="str">"Age_Next_Year"</span>])
+
+<span class="cmt"># Split-Apply-Combine with groupby().agg()</span>
+summary = df.<span class="fn">groupby</span>(<span class="str">"Major"</span>)[<span class="str">"Age"</span>].<span class="fn">agg</span>([<span class="str">"mean"</span>, <span class="str">"min"</span>, <span class="str">"max"</span>])
+
+<span class="cmt"># Missing values & File I/O</span>
+<span class="cmt"># df.isnull().sum()  |  df.dropna()  |  df["Age"].fillna(df["Age"].mean())</span>
+<span class="cmt"># df.to_csv("cleaned.csv", index=False)  # index=False avoids extra index col</span></div>
+        <div class="output-pane">
+          <div class="out-tag">GroupBy Aggregation Output</div>
+          <table class="df-out">
+            <thead><tr><th>Major</th><th>mean</th><th>min</th><th>max</th></tr></thead>
+            <tbody>
+              <tr><td>Biology</td><td>19.0</td><td>19</td><td>19</td></tr>
+              <tr><td>CS</td><td>22.0</td><td>22</td><td>22</td></tr>
+              <tr><td>Math</td><td>20.0</td><td>20</td><td>20</td></tr>
+              <tr><td>Physics</td><td>25.0</td><td>25</td><td>25</td></tr>
             </tbody>
           </table>
         </div>
@@ -300,161 +816,509 @@ Mean: 87.5</div>
     </div>
   </div>
 
-  <!-- 4. MATPLOTLIB -->
-  <div id="matplotlib" class="section">
-    <h1>Matplotlib: Pyplot Basics</h1>
-    <p class="subtitle">Step-by-step plotting with markers, line styles, and axis labels.</p>
+  <!-- ==================== TAB 3: MATPLOTLIB ==================== -->
+  <div id="tab-mpl" class="section">
+    <h1>Deck 3: Python Matplotlib (<code class="inline">pyplot</code>)</h1>
+    <p class="lead">Complete syntax from Dr. Abebe's <em>Python Matplotlib</em> deck: line & marker formatting, fontdicts, grid customization, <code class="inline">plt.subplot()</code>, colormaps (<code class="inline">cmap</code>), bars, histograms, and pie charts.</p>
+
+    <div class="pipeline-box">
+      <div class="pipeline-title">How Matplotlib Compares to Seaborn & Plotly</div>
+      <ul>
+        <li><strong>Matplotlib (<code class="inline">plt</code>) vs. Seaborn (<code class="inline">sns</code>):</strong> Matplotlib is low-level and manual—you pass separate <code class="inline">x</code> and <code class="inline">y</code> arrays and build titles, grids, and subplots line by line. Seaborn sits <em>on top</em> of Matplotlib to automate statistical aggregations and multi-panel facets from a DataFrame.</li>
+        <li><strong>Why you still need Matplotlib:</strong> Even when plotting with Seaborn, you call <code class="inline">plt.title()</code>, <code class="inline">plt.xlabel()</code>, <code class="inline">plt.savefig("fig.jpg")</code>, and <code class="inline">plt.show()</code> to label, save, and render the figure.</li>
+      </ul>
+    </div>
+
+    <h2>3.1 Markers, Lines, Format Strings (<code class="inline">'o:r'</code>), FontDicts, & Grids</h2>
+    <ul>
+      <li><strong>Default X-Points:</strong> Calling <code class="inline">plt.plot(ypoints)</code> with only one array automatically sets <code class="inline">x = [0, 1, 2, ...]</code>.</li>
+      <li><strong>Format String Shortcut:</strong> <code class="inline">'o:r'</code> combines <code class="inline">marker='o'</code> + <code class="inline">linestyle=':'</code> (dotted) + <code class="inline">color='r'</code> (red).</li>
+      <li><strong>Marker Keyword Styling:</strong> <code class="inline">ms</code> = marker size, <code class="inline">mec</code> = marker edge color, <code class="inline">mfc</code> = marker face (fill) color.</li>
+      <li><strong>Line Keyword Styling:</strong> <code class="inline">ls</code> (<code class="inline">'-'</code> solid, <code class="inline">':'</code> dotted, <code class="inline">'--'</code> dashed, <code class="inline">'-.'</code> dashdot), <code class="inline">c</code> (color), <code class="inline">lw</code> (linewidth).</li>
+    </ul>
 
     <div class="ide-card">
       <div class="ide-header">
         <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
-        <span>matplotlib_line.py</span>
+        <span>matplotlib_lines_markers_labels.py</span>
       </div>
       <div class="ide-split">
-        <div class="code-pane">
-          <div class="code-line"><span class="ln">1</span><span><span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt</span></div>
-          <div class="code-line"><span class="ln">2</span><span><span class="kw">import</span> numpy <span class="kw">as</span> np</span></div>
-          <div class="code-line"><span class="ln">3</span><span></span></div>
-          <div class="code-line"><span class="ln">4</span><span>x = np.<span class="fn">array</span>([<span class="num">80</span>, <span class="num">90</span>, <span class="num">100</span>, <span class="num">110</span>, <span class="num">120</span>])</span></div>
-          <div class="code-line"><span class="ln">5</span><span>y = np.<span class="fn">array</span>([<span class="num">240</span>, <span class="num">260</span>, <span class="num">280</span>, <span class="num">300</span>, <span class="num">320</span>])</span></div>
-          <div class="code-line"><span class="ln">6</span><span></span></div>
-          <div class="code-line"><span class="ln">7</span><span>plt.<span class="fn">plot</span>(x, y, marker=<span class="str">'o'</span>, ls=<span class="str">'--'</span>, color=<span class="str">'r'</span>)</span></div>
-          <div class="code-line"><span class="ln">8</span><span>plt.<span class="fn">title</span>(<span class="str">"Sports Watch Data"</span>)</span></div>
-          <div class="code-line"><span class="ln">9</span><span>plt.<span class="fn">xlabel</span>(<span class="str">"Average Pulse"</span>)</span></div>
-          <div class="code-line"><span class="ln">10</span><span>plt.<span class="fn">ylabel</span>(<span class="str">"Calorie Burnage"</span>)</span></div>
-          <div class="code-line"><span class="ln">11</span><span>plt.<span class="fn">grid</span>()</span></div>
-          <div class="code-line"><span class="ln">12</span><span>plt.<span class="fn">show</span>()</span></div>
-        </div>
+        <div class="code-pane"><span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+x = np.<span class="fn">array</span>([<span class="num">80</span>, <span class="num">90</span>, <span class="num">100</span>, <span class="num">110</span>, <span class="num">120</span>])
+y = np.<span class="fn">array</span>([<span class="num">240</span>, <span class="num">260</span>, <span class="num">280</span>, <span class="num">300</span>, <span class="num">320</span>])
+
+font1 = {<span class="str">'family'</span>: <span class="str">'serif'</span>, <span class="str">'color'</span>: <span class="str">'blue'</span>, <span class="str">'size'</span>: <span class="num">16</span>}
+font2 = {<span class="str">'family'</span>: <span class="str">'serif'</span>, <span class="str">'color'</span>: <span class="str">'darkred'</span>, <span class="str">'size'</span>: <span class="num">12</span>}
+
+plt.<span class="fn">plot</span>(x, y, marker=<span class="str">'o'</span>, ms=<span class="num">10</span>, mec=<span class="str">'#4CAF50'</span>, mfc=<span class="str">'#4CAF50'</span>, ls=<span class="str">'--'</span>, lw=<span class="num">2</span>)
+plt.<span class="fn">title</span>(<span class="str">"Sports Watch Data"</span>, fontdict=font1, loc=<span class="str">'left'</span>)
+plt.<span class="fn">xlabel</span>(<span class="str">"Average Pulse"</span>, fontdict=font2)
+plt.<span class="fn">ylabel</span>(<span class="str">"Calorie Burnage"</span>, fontdict=font2)
+plt.<span class="fn">grid</span>(axis=<span class="str">'both'</span>, color=<span class="str">'green'</span>, linestyle=<span class="str">'--'</span>, linewidth=<span class="num">0.5</span>)
+plt.<span class="fn">show</span>()</div>
         <div class="output-pane">
-          <div class="output-label">Rendered Figure</div>
-          <div id="mpl-chart" class="chart-box"></div>
+          <div class="out-tag">Rendered Matplotlib Figure</div>
+          <div id="plot-mpl-line" class="plot-box"></div>
+        </div>
+      </div>
+    </div>
+
+    <h2>3.2 Subplots, Colormap Scatter, Bars, Histograms, & Pie Charts</h2>
+    <div class="ide-card">
+      <div class="ide-header">
+        <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+        <span>matplotlib_all_chart_types.py</span>
+      </div>
+      <div class="ide-split">
+        <div class="code-pane"><span class="cmt"># 1. Subplots: plt.subplot(rows, cols, index) + suptitle</span>
+plt.<span class="fn">subplot</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">1</span>)
+plt.<span class="fn">plot</span>([<span class="num">0</span>, <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>], [<span class="num">3</span>, <span class="num">8</span>, <span class="num">1</span>, <span class="num">10</span>]); plt.<span class="fn">title</span>(<span class="str">"SALES"</span>)
+
+plt.<span class="fn">subplot</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">2</span>)
+plt.<span class="fn">plot</span>([<span class="num">0</span>, <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>], [<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>]); plt.<span class="fn">title</span>(<span class="str">"INCOME"</span>)
+plt.<span class="fn">suptitle</span>(<span class="str">"MY SHOP"</span>)
+
+<span class="cmt"># 2. Scatter with Colormap (cmap), Sizes (s), & Alpha</span>
+colors = np.<span class="fn">array</span>([<span class="num">0</span>, <span class="num">20</span>, <span class="num">40</span>, <span class="num">60</span>, <span class="num">80</span>, <span class="num">100</span>])
+plt.<span class="fn">scatter</span>(x_arr, y_arr, c=colors, cmap=<span class="str">'viridis'</span>, s=<span class="num">100</span>, alpha=<span class="num">0.7</span>)
+plt.<span class="fn">colorbar</span>()
+
+<span class="cmt"># 3. Bars, Histograms, & Pie Charts</span>
+plt.<span class="fn">bar</span>([<span class="str">"A"</span>, <span class="str">"B"</span>], [<span class="num">3</span>, <span class="num">8</span>], width=<span class="num">0.4</span>)     <span class="cmt"># or plt.barh(..., height=0.4)</span>
+plt.<span class="fn">hist</span>(np.random.<span class="fn">normal</span>(<span class="num">170</span>, <span class="num">10</span>, <span class="num">250</span>), bins=<span class="num">20</span>)
+plt.<span class="fn">pie</span>([<span class="num">35</span>, <span class="num">25</span>, <span class="num">25</span>, <span class="num">15</span>], labels=[<span class="str">"Apples"</span>, <span class="str">"Bananas"</span>, <span class="str">"Cherries"</span>, <span class="str">"Dates"</span>],
+        startangle=<span class="num">90</span>, explode=[<span class="num">0.2</span>, <span class="num">0</span>, <span class="num">0</span>, <span class="num">0</span>], shadow=<span class="kw">True</span>)
+plt.<span class="fn">legend</span>(title=<span class="str">"Four Fruits:"</span>)</div>
+        <div class="output-pane">
+          <div class="out-tag">Rendered Scatter with Viridis Colormap</div>
+          <div id="plot-mpl-scatter" class="plot-box"></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 5. SEABORN -->
-  <div id="seaborn" class="section">
-    <h1>Seaborn: Statistical Plots (catplot & KDE)</h1>
-    <p class="subtitle">Figure-level categorical plots and smooth density distributions on the Titanic dataset.</p>
+  <!-- ==================== TAB 4A: STATS & EDA ==================== -->
+  <div id="tab-eda" class="section">
+    <h1>Deck 4A: Descriptive Statistics & Exploratory Data Analysis (EDA)</h1>
+    <p class="lead">Statistical foundations (Central Tendency, Dispersion, Shape, IQR Outliers) and Pandas feature engineering (<code class="inline">pd.get_dummies</code>, <code class="inline">pd.cut</code>, group-median imputation) on the Titanic dataset.</p>
 
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Metric & Formula</th>
+          <th>Titanic Insight & When to Use</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Central Tendency</strong></td>
+          <td><strong>Mean</strong> ($\bar{X} = \frac{\sum X}{n}$)<br><strong>Median</strong> (middle sorted value)<br><strong>Mode</strong> (most frequent)</td>
+          <td>Age is balanced (Mean 29.70 ≈ Median 28.0). Fare is heavily right-skewed (Mean 32.20 vs. Median 14.45 due to $512 tickets), so <strong>Median</strong> better represents a typical fare.</td>
+        </tr>
+        <tr>
+          <td><strong>Dispersion</strong></td>
+          <td><strong>Range</strong> ($\max - \min$)<br><strong>Variance</strong> ($\sigma^2 = \frac{\sum(X_i - \bar{X})^2}{n}$)<br><strong>Std Dev</strong> ($\sigma = \sqrt{\sigma^2}$)</td>
+          <td>Fare $\sigma = 49.67$ is larger than its mean (32.20), proving extreme price spread. Range is sensitive to a single outlier.</td>
+        </tr>
+        <tr>
+          <td><strong>Shape</strong></td>
+          <td><strong>Skewness</strong>: $>0$ right tail (Mean $>$ Median); $\approx 0$ symmetric; $<0$ left tail.<br><strong>Kurtosis</strong>: tail heaviness (Normal = 3).</td>
+          <td>Age: Skew = 0.39, Kurtosis = 3.18 (nearly normal).<br>Fare: Skew = 4.79, Kurtosis = 36.40 (strongly right-skewed with heavy outliers).</td>
+        </tr>
+        <tr>
+          <td><strong>IQR Outlier Fence</strong></td>
+          <td>$\text{Upper Fence} = Q_3 + 1.5 \times \text{IQR}$<br>where $\text{IQR} = Q_3 - Q_1$</td>
+          <td>For Fare: $Q_1 = 7.91, Q_3 = 31 \implies 31 + 1.5(23.09) \approx 65.6$. 116 passengers sit above 65.6—kept because they are real luxury tickets, not data errors.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>4A.1 Complete Titanic EDA & Feature Engineering Pipeline (Deck 2 + Deck 4)</h2>
     <div class="ide-card">
       <div class="ide-header">
         <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
-        <span>seaborn_titanic.py</span>
+        <span>titanic_eda_transformation.py</span>
       </div>
       <div class="ide-split">
-        <div class="code-pane">
-          <div class="code-line"><span class="ln">1</span><span><span class="kw">import</span> seaborn <span class="kw">as</span> sns</span></div>
-          <div class="code-line"><span class="ln">2</span><span><span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt</span></div>
-          <div class="code-line"><span class="ln">3</span><span></span></div>
-          <div class="code-line"><span class="ln">4</span><span><span class="cmt"># Grouped bar plot comparing survival rates</span></span></div>
-          <div class="code-line"><span class="ln">5</span><span>sns.<span class="fn">catplot</span>(</span></div>
-          <div class="code-line"><span class="ln">6</span><span>&nbsp;&nbsp;data=df_filtered,</span></div>
-          <div class="code-line"><span class="ln">7</span><span>&nbsp;&nbsp;x=<span class="str">'Pclass'</span>, y=<span class="str">'Survived'</span>,</span></div>
-          <div class="code-line"><span class="ln">8</span><span>&nbsp;&nbsp;hue=<span class="str">'Sex'</span>, kind=<span class="str">'bar'</span></span></div>
-          <div class="code-line"><span class="ln">9</span><span>)</span></div>
-          <div class="code-line"><span class="ln">10</span><span>plt.<span class="fn">show</span>()</span></div>
-        </div>
+        <div class="code-pane"><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+df = pd.<span class="fn">read_csv</span>(<span class="str">"titanic.csv"</span>)
+
+<span class="cmt"># 1. Impute missing Age with median of each Pclass (Deck 2 groupby + transform)</span>
+df[<span class="str">"Age"</span>] = df[<span class="str">"Age"</span>].<span class="fn">fillna</span>(df.<span class="fn">groupby</span>(<span class="str">"Pclass"</span>)[<span class="str">"Age"</span>].<span class="fn">transform</span>(<span class="str">"median"</span>))
+
+<span class="cmt"># 2. One-Hot Encoding categorical columns into 0/1 indicator columns</span>
+df = pd.<span class="fn">get_dummies</span>(df, columns=[<span class="str">"Sex"</span>, <span class="str">"Embarked"</span>])
+
+<span class="cmt"># 3. Feature Engineering: combine columns + bin continuous Age with pd.cut</span>
+df[<span class="str">"FamilySize"</span>] = df[<span class="str">"SibSp"</span>] + df[<span class="str">"Parch"</span>] + <span class="num">1</span>
+
+bins = [<span class="num">0</span>, <span class="num">12</span>, <span class="num">19</span>, <span class="num">35</span>, <span class="num">60</span>, <span class="num">120</span>]
+labels = [<span class="str">"Child"</span>, <span class="str">"Teen"</span>, <span class="str">"Young Adult"</span>, <span class="str">"Adult"</span>, <span class="str">"Senior"</span>]
+df[<span class="str">"AgeGroup"</span>] = pd.<span class="fn">cut</span>(df[<span class="str">"Age"</span>], bins=bins, labels=labels)</div>
         <div class="output-pane">
-          <div class="output-label">Rendered FacetGrid</div>
-          <div id="sns-chart" class="chart-box"></div>
+          <div class="out-tag">EDA Findings Summary</div>
+          <div class="console-out">• Missing Values Fixed: Cabin (77.1% missing -> dropped), Age (177 missing -> filled with Pclass median: 1st=37, 2nd=29, 3rd=24), Embarked (2 missing -> mode 'S').
+• One-Hot Encoding: 'Sex' splits into 'Sex_male' (1/0) and 'Sex_female' (0/1).
+• pd.cut() Result: Bins numeric Age into 5 ordered categories used in Deck 4B's FacetGrid!</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 6. PLOTLY -->
-  <div id="plotly" class="section">
-    <h1>Plotly Express: Interactive Charts</h1>
-    <p class="subtitle">Hover, zoom, and pan directly inside the output pane.</p>
+  <!-- ==================== TAB 4B: SEABORN ==================== -->
+  <div id="tab-sns" class="section">
+    <h1>Deck 4B: Seaborn (<code class="inline">catplot()</code> & <code class="inline">kdeplot()</code>)</h1>
+    <p class="lead">Figure-level categorical grids (<code class="inline">FacetGrid</code>) and smooth Kernel Density Estimation curves built directly on top of Matplotlib and Pandas.</p>
+
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Architecture</th>
+          <th>Examples</th>
+          <th>How Layout Is Controlled</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Axes-level functions</strong></td>
+          <td><code class="inline">sns.boxplot()</code>, <code class="inline">sns.countplot()</code>, <code class="inline">sns.kdeplot()</code></td>
+          <td>Draws onto a single Matplotlib <code class="inline">Axes</code>. Controlled via <code class="inline">plt.subplots()</code>.</td>
+        </tr>
+        <tr>
+          <td><strong>Figure-level functions</strong></td>
+          <td><code class="inline">sns.catplot()</code></td>
+          <td>Creates and returns a full <code class="inline">FacetGrid</code>. Controlled via its own arguments: <code class="inline">row=</code>, <code class="inline">col=</code>, <code class="inline">height=</code>, <code class="inline">aspect=</code>.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>4B.1 All 7 <code class="inline">sns.catplot(kind=...)</code> Modes & Multi-Panel Facets</h2>
+    <ul>
+      <li><strong>7 Plot Kinds:</strong> <code class="inline">'strip'</code> (dots), <code class="inline">'swarm'</code> (non-overlapping dots), <code class="inline">'box'</code> (Q1–Q3 box + median + 1.5×IQR whiskers), <code class="inline">'violin'</code> (KDE + box), <code class="inline">'bar'</code> (bar height = mean + CI), <code class="inline">'count'</code> (row frequency per category), <code class="inline">'point'</code> (mean + confidence interval).</li>
+      <li><strong>Palettes & Saving:</strong> Inspect available palettes with <code class="inline">sns.palettes.SEABORN_PALETTES.keys()</code> and save grids with <code class="inline">plt.savefig('FacetGrid.jpg')</code> before <code class="inline">plt.show()</code>.</li>
+    </ul>
 
     <div class="ide-card">
       <div class="ide-header">
         <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
-        <span>plotly_interactive.py</span>
+        <span>seaborn_catplot_facets.py</span>
       </div>
       <div class="ide-split">
-        <div class="code-pane">
-          <div class="code-line"><span class="ln">1</span><span><span class="kw">import</span> plotly.express <span class="kw">as</span> px</span></div>
-          <div class="code-line"><span class="ln">2</span><span></span></div>
-          <div class="code-line"><span class="ln">3</span><span>fig = px.<span class="fn">scatter</span>(</span></div>
-          <div class="code-line"><span class="ln">4</span><span>&nbsp;&nbsp;df_filtered,</span></div>
-          <div class="code-line"><span class="ln">5</span><span>&nbsp;&nbsp;x=<span class="str">'Age'</span>, y=<span class="str">'Fare'</span>,</span></div>
-          <div class="code-line"><span class="ln">6</span><span>&nbsp;&nbsp;color=<span class="str">'Survived'</span>,</span></div>
-          <div class="code-line"><span class="ln">7</span><span>&nbsp;&nbsp;size=<span class="str">'Fare'</span>,</span></div>
-          <div class="code-line"><span class="ln">8</span><span>&nbsp;&nbsp;title=<span class="str">'Titanic: Age vs Fare'</span></span></div>
-          <div class="code-line"><span class="ln">9</span><span>)</span></div>
-          <div class="code-line"><span class="ln">10</span><span>fig.<span class="fn">show</span>()</span></div>
-        </div>
+        <div class="code-pane"><span class="kw">import</span> seaborn <span class="kw">as</span> sns
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+
+<span class="cmt"># Example 1: Box plot of Fare by Pclass</span>
+sns.<span class="fn">catplot</span>(data=df_filtered, x=<span class="str">'Pclass'</span>, y=<span class="str">'Fare'</span>, kind=<span class="str">'box'</span>)
+plt.<span class="fn">show</span>()
+
+<span class="cmt"># Example 2: Count plot split into side-by-side panels with col=</span>
+sns.<span class="fn">catplot</span>(x=<span class="str">'Pclass'</span>, hue=<span class="str">'Sex'</span>, col=<span class="str">'Survived'</span>, kind=<span class="str">'count'</span>, data=df_filtered)
+plt.<span class="fn">show</span>()
+
+<span class="cmt"># Example 3: 6-panel grid using BOTH row= and col= + AgeGroup from pd.cut()</span>
+sns.<span class="fn">catplot</span>(
+    x=<span class="str">'Survived'</span>, row=<span class="str">'Pclass'</span>, col=<span class="str">'Sex'</span>,
+    kind=<span class="str">'count'</span>, hue=<span class="str">'AgeGroup'</span>, palette=<span class="str">'seismic'</span>,
+    data=df_filtered
+)
+plt.<span class="fn">savefig</span>(<span class="str">'FacetGrid.jpg'</span>)
+plt.<span class="fn">show</span>()</div>
         <div class="output-pane">
-          <div class="output-label">Interactive HTML Output (Hover over points!)</div>
-          <div id="px-chart" class="chart-box"></div>
+          <div class="out-tag">Simulated Example 2: col='Survived' Count Plot</div>
+          <div id="plot-sns-cat" class="plot-box"></div>
         </div>
       </div>
+    </div>
+
+    <h2>4B.2 Kernel Density Estimation (<code class="inline">sns.kdeplot</code>)</h2>
+    <p>Places a smooth Gaussian bump on every data point and sums them so total area under each curve equals <strong>1</strong> (y-axis is <em>Density</em>, not raw counts). Use <code class="inline">clip=(0, 90)</code> to prevent smooth tails from spilling below age 0, and <code class="inline">bw_adjust=</code> to control smoothness (small = wiggly, large = over-smooth).</p>
+
+    <div class="ide-card">
+      <div class="ide-header">
+        <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+        <span>seaborn_kdeplot.py</span>
+      </div>
+      <div class="ide-split">
+        <div class="code-pane"><span class="fn">sns.kdeplot</span>(
+    data=df_filtered,
+    x=<span class="str">'Age'</span>,
+    hue=<span class="str">'Survived'</span>,
+    fill=<span class="kw">True</span>,
+    clip=(<span class="num">0</span>, <span class="num">90</span>),      <span class="cmt"># Cuts smooth tails outside valid age range</span>
+    bw_adjust=<span class="num">1.0</span>      <span class="cmt"># Bandwidth multiplier (0.5 = wiggly, 2 = smooth)</span>
+)
+plt.<span class="fn">title</span>(<span class="str">"KDE Distribution of Age by Survival Status"</span>)
+plt.<span class="fn">xlabel</span>(<span class="str">"Age"</span>)
+plt.<span class="fn">ylabel</span>(<span class="str">"Density"</span>)
+plt.<span class="fn">show</span>()</div>
+        <div class="output-pane">
+          <div class="out-tag">Simulated KDE Density Curves (Area = 1)</div>
+          <div id="plot-sns-kde" class="plot-box"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 4C: PLOTLY EXPRESS ==================== -->
+  <div id="tab-px" class="section">
+    <h1>Deck 4C: Plotly Express (<code class="inline">plotly.express as px</code>)</h1>
+    <p class="lead">One-line interactive web visualizations with built-in zoom, pan, hover tooltips, discrete vs. continuous color mapping, and standalone HTML export.</p>
+
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Matplotlib (<code class="inline">plt</code>)</th>
+          <th>Seaborn (<code class="inline">sns</code>)</th>
+          <th>Plotly Express (<code class="inline">px</code>)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Output Type</strong></td>
+          <td>Static image (PNG/JPG/PDF)</td>
+          <td>Static image (built on Matplotlib)</td>
+          <td>Interactive HTML/JS (hover, zoom, pan, toggle legend)</td>
+        </tr>
+        <tr>
+          <td><strong>Code Level</strong></td>
+          <td>Low-level (many lines per chart)</td>
+          <td>High-level statistical grids (<code class="inline">catplot</code>)</td>
+          <td>High-level one-liners (<code class="inline">px.scatter</code>, <code class="inline">px.bar</code>)</td>
+        </tr>
+        <tr>
+          <td><strong>Export Method</strong></td>
+          <td><code class="inline">plt.savefig("plot.png")</code></td>
+          <td><code class="inline">plt.savefig("plot.jpg")</code></td>
+          <td><code class="inline">fig.write_html("plot.html")</code> (or <code class="inline">write_image</code> with <code class="inline">kaleido</code>)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip-box">
+      <strong>Two Crucial Plotly Gotchas from Dr. Abebe's Slides:</strong><br>
+      1. <strong><code class="inline">px.bar(df, x='Pclass', y='Fare')</code> on raw rows</strong> stacks individual passenger fares, meaning the bar height shows the <strong>SUM</strong> of fares—not the mean!<br>
+      2. <strong>Numeric 0/1 Colors:</strong> Passing <code class="inline">color='Survived'</code> when <code class="inline">Survived</code> is integer <code class="inline">0/1</code> creates a continuous gradient colorbar. Convert it with <code class="inline">df['Survived'].astype(str)</code> to get two discrete categorical colors!
+    </div>
+
+    <div class="ide-card">
+      <div class="ide-header">
+        <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+        <span>plotly_express_interactive.py</span>
+      </div>
+      <div class="ide-split">
+        <div class="code-pane"><span class="kw">import</span> plotly.express <span class="kw">as</span> px
+
+<span class="cmt"># 1. Bar chart (note: sums Fare per Pclass on unaggregated rows)</span>
+fig_bar = px.<span class="fn">bar</span>(df_filtered, x=<span class="str">'Pclass'</span>, y=<span class="str">'Fare'</span>)
+fig_bar.<span class="fn">write_html</span>(<span class="str">"pclass_fare_plot.html"</span>)
+
+<span class="cmt"># 2. Multivariate Bubble Scatter (4 variables: x, y, color, size + hover_data)</span>
+df_filtered[<span class="str">'Survived_str'</span>] = df_filtered[<span class="str">'Survived'</span>].<span class="fn">astype</span>(str)
+
+fig = px.<span class="fn">scatter</span>(
+    df_filtered,
+    x=<span class="str">'Age'</span>,
+    y=<span class="str">'Fare'</span>,
+    color=<span class="str">'Survived_str'</span>,       <span class="cmt"># Discrete colors because of .astype(str)</span>
+    size=<span class="str">'Fare'</span>,                <span class="cmt"># Bubble size scaled by Fare</span>
+    size_max=<span class="num">25</span>,                <span class="cmt"># Cap maximum bubble radius</span>
+    hover_data=[<span class="str">'Sex'</span>, <span class="str">'Pclass'</span>],
+    title=<span class="str">'Fare vs Age (Hover & Zoom Enabled)'</span>
+)
+fig.<span class="fn">show</span>()</div>
+        <div class="output-pane">
+          <div class="out-tag">Live Interactive Plotly Chart (Hover & Drag to Zoom!)</div>
+          <div id="plot-px-live" class="plot-box"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 5: PRACTICE EXAM QUIZ ==================== -->
+  <div id="tab-quiz" class="section">
+    <h1>Self-Study Mastery Quiz (All 4 Decks)</h1>
+    <p class="lead">Test yourself on the exact rules and edge cases highlighted across Dr. Abebe's slides.</p>
+
+    <div class="quiz-card">
+      <p><strong>Q1 (Deck 1 - Functions): What is the required parameter order when combining all argument types in Python?</strong></p>
+      <label class="quiz-opt"><input type="radio" name="q1" value="a"> a) <code class="inline">positional → **kwargs → *args → keyword-only</code></label>
+      <label class="quiz-opt"><input type="radio" name="q1" value="b"> b) <code class="inline">positional → *args → keyword-only → **kwargs</code></label>
+      <label class="quiz-opt"><input type="radio" name="q1" value="c"> c) <code class="inline">*args → positional → **kwargs → keyword-only</code></label>
+      <button class="quiz-btn" onclick="grade('q1', 'b', 'r1', 'Correct! Normal positional parameters come first, then *args (tuple), then keyword-only parameters, and finally **kwargs (dict).')">Check Answer</button>
+      <div id="r1" class="quiz-res"></div>
+    </div>
+
+    <div class="quiz-card">
+      <p><strong>Q2 (Deck 1 - Functions): If a function uses <code class="inline">print(x * 2)</code> instead of <code class="inline">return x * 2</code>, what value gets stored when you run <code class="inline">a = show(4)</code>?</strong></p>
+      <label class="quiz-opt"><input type="radio" name="q2" value="a"> a) <code class="inline">8</code></label>
+      <label class="quiz-opt"><input type="radio" name="q2" value="b"> b) <code class="inline">None</code></label>
+      <label class="quiz-opt"><input type="radio" name="q2" value="c"> c) <code class="inline">TypeError</code></label>
+      <button class="quiz-btn" onclick="grade('q2', 'b', 'r2', 'Correct! print() only displays text for humans; without a return statement, Python quietly returns None.')">Check Answer</button>
+      <div id="r2" class="quiz-res"></div>
+    </div>
+
+    <div class="quiz-card">
+      <p><strong>Q3 (Deck 2A - NumPy): Which operator performs true linear algebra matrix multiplication between two 2D NumPy arrays <code class="inline">A</code> and <code class="inline">B</code>?</strong></p>
+      <label class="quiz-opt"><input type="radio" name="q3" value="a"> a) <code class="inline">A * B</code></label>
+      <label class="quiz-opt"><input type="radio" name="q3" value="b"> b) <code class="inline">A @ B</code></label>
+      <label class="quiz-opt"><input type="radio" name="q3" value="c"> c) <code class="inline">A ** B</code></label>
+      <button class="quiz-btn" onclick="grade('q3', 'b', 'r3', 'Correct! A * B performs element-wise multiplication, whereas A @ B performs row-by-column matrix multiplication.')">Check Answer</button>
+      <div id="r3" class="quiz-res"></div>
+    </div>
+
+    <div class="quiz-card">
+      <p><strong>Q4 (Deck 2B - Pandas): Which syntax properly filters a Pandas DataFrame for students older than 20 AND majoring in Physics?</strong></p>
+      <label class="quiz-opt"><input type="radio" name="q4" value="a"> a) <code class="inline">df[df["Age"] > 20 and df["Major"] == "Physics"]</code></label>
+      <label class="quiz-opt"><input type="radio" name="q4" value="b"> b) <code class="inline">df[(df["Age"] > 20) & (df["Major"] == "Physics")]</code></label>
+      <label class="quiz-opt"><input type="radio" name="q4" value="c"> c) <code class="inline">df[df["Age"] > 20 & df["Major"] == "Physics"]</code></label>
+      <button class="quiz-btn" onclick="grade('q4', 'b', 'r4', 'Correct! You must use & instead of and, AND wrap each condition in parentheses.')">Check Answer</button>
+      <div id="r4" class="quiz-res"></div>
+    </div>
+
+    <div class="quiz-card">
+      <p><strong>Q5 (Deck 3 - Matplotlib): What does the format string <code class="inline">'o:r'</code> in <code class="inline">plt.plot(y, 'o:r')</code> specify?</strong></p>
+      <label class="quiz-opt"><input type="radio" name="q5" value="a"> a) Circle markers, dotted line, red color</label>
+      <label class="quiz-opt"><input type="radio" name="q5" value="b"> b) Octagon markers, dashed line, royal blue color</label>
+      <label class="quiz-opt"><input type="radio" name="q5" value="c"> c) Open markers, solid line, red color</label>
+      <button class="quiz-btn" onclick="grade('q5', 'a', 'r5', 'Correct! Format strings follow marker-linestyle-color: o (circle), : (dotted), r (red).')">Check Answer</button>
+      <div id="r5" class="quiz-res"></div>
+    </div>
+
+    <div class="quiz-card">
+      <p><strong>Q6 (Deck 4A - Descriptive Stats): Why is the Median ($14.45) preferred over the Mean ($32.20) for Titanic ticket Fares?</strong></p>
+      <label class="quiz-opt"><input type="radio" name="q6" value="a"> a) Fare has a strong negative (left) skew</label>
+      <label class="quiz-opt"><input type="radio" name="q6" value="b"> b) Fare is strongly right-skewed (skew = 4.79) with extreme luxury outliers up to $512.33 that pull the mean upward</label>
+      <label class="quiz-opt"><input type="radio" name="q6" value="c"> c) Fare has missing values</label>
+      <button class="quiz-btn" onclick="grade('q6', 'b', 'r6', 'Correct! High right-skewness pulls the arithmetic mean far above the typical middle passenger fare.')">Check Answer</button>
+      <div id="r6" class="quiz-res"></div>
+    </div>
+
+    <div class="quiz-card">
+      <p><strong>Q7 (Deck 4B - Seaborn): Why is <code class="inline">sns.catplot()</code> called a "figure-level" function rather than an "axes-level" function?</strong></p>
+      <label class="quiz-opt"><input type="radio" name="q7" value="a"> a) It only draws on an existing Matplotlib axis</label>
+      <label class="quiz-opt"><input type="radio" name="q7" value="b"> b) It builds and returns an entire FacetGrid, allowing multi-panel grids via row= and col=</label>
+      <label class="quiz-opt"><input type="radio" name="q7" value="c"> c) It exports interactive HTML files</label>
+      <button class="quiz-btn" onclick="grade('q7', 'b', 'r7', 'Correct! Figure-level functions manage their own FacetGrid layout through row=, col=, height=, and aspect=.')">Check Answer</button>
+      <div id="r7" class="quiz-res"></div>
+    </div>
+
+    <div class="quiz-card">
+      <p><strong>Q8 (Deck 4C - Plotly Express): What happens when you run <code class="inline">px.bar(df_filtered, x='Pclass', y='Fare')</code> directly on unaggregated Titanic rows?</strong></p>
+      <label class="quiz-opt"><input type="radio" name="q8" value="a"> a) Each bar displays the mean Fare per class</label>
+      <label class="quiz-opt"><input type="radio" name="q8" value="b"> b) Plotly stacks individual rows so the bar height represents the SUM of fares, not the mean</label>
+      <label class="quiz-opt"><input type="radio" name="q8" value="c"> c) It raises a ValueError</label>
+      <button class="quiz-btn" onclick="grade('q8', 'b', 'r8', 'Correct! px.bar on raw rows stacks each row value into a sum; group with Pandas first if you want means.')">Check Answer</button>
+      <div id="r8" class="quiz-res"></div>
     </div>
   </div>
 
 </div>
 
 <script>
-  function showTab(tabId, btn) {
+  function openTab(tabId, btn) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
     btn.classList.add('active');
-    window.dispatchEvent(new Event('resize')); // Resize Plotly charts cleanly
+    window.dispatchEvent(new Event('resize'));
   }
 
-  // Render simulated Matplotlib output
-  Plotly.newPlot('mpl-chart', [{
+  function grade(qName, ans, resId, msg) {
+    const sel = document.querySelector(`input[name="${qName}"]:checked`);
+    const box = document.getElementById(resId);
+    if (!sel) { box.textContent = "Please select an option first."; box.style.color = "#f59e0b"; return; }
+    if (sel.value === ans) { box.textContent = msg; box.style.color = "#10b981"; }
+    else { box.textContent = "Not quite—review the comparison table above and try again!"; box.style.color = "#ef4444"; }
+  }
+
+  // Deck 3: Matplotlib Line + Styled Markers + Custom Grid
+  Plotly.newPlot('plot-mpl-line', [{
     x: [80, 90, 100, 110, 120],
     y: [240, 260, 280, 300, 320],
     mode: 'lines+markers',
-    line: { dash: 'dash', color: 'red' },
-    marker: { size: 8 }
+    line: { dash: 'dash', width: 2, color: '#1f77b4' },
+    marker: { size: 10, color: '#4CAF50', line: { color: '#4CAF50', width: 2 } }
   }], {
-    title: 'Sports Watch Data',
-    xaxis: { title: 'Average Pulse', showgrid: true },
-    yaxis: { title: 'Calorie Burnage', showgrid: true },
-    margin: { t: 35, l: 45, r: 20, b: 40 },
-    height: 220
+    title: { text: 'Sports Watch Data', x: 0.05, font: { family: 'serif', color: 'blue', size: 16 } },
+    xaxis: { title: 'Average Pulse', gridcolor: 'green', griddash: 'dash' },
+    yaxis: { title: 'Calorie Burnage', gridcolor: 'green', griddash: 'dash' },
+    margin: { t: 40, l: 55, r: 20, b: 45 },
+    height: 230
   }, { staticPlot: true });
 
-  // Render simulated Seaborn catplot output (Titanic Survival by Class & Sex)
-  Plotly.newPlot('sns-chart', [
-    { x: ['First', 'Second', 'Third'], y: [0.37, 0.16, 0.14], name: 'male', type: 'bar', marker: { color: '#3b82f6' } },
-    { x: ['First', 'Second', 'Third'], y: [0.97, 0.92, 0.50], name: 'female', type: 'bar', marker: { color: '#f97316' } }
+  // Deck 3: Matplotlib Scatter with Viridis Colormap
+  Plotly.newPlot('plot-mpl-scatter', [{
+    x: [5, 7, 8, 7, 2, 17, 2, 9, 4, 11, 12, 9, 6],
+    y: [99, 86, 87, 88, 111, 86, 103, 87, 94, 78, 77, 85, 86],
+    mode: 'markers',
+    marker: {
+      size: 11,
+      opacity: 0.85,
+      color: [0, 10, 20, 30, 40, 45, 50, 55, 60, 70, 80, 90, 100],
+      colorscale: 'Viridis',
+      showscale: true
+    }
+  }], {
+    title: 'plt.scatter(..., cmap="viridis") + plt.colorbar()',
+    xaxis: { title: 'X' },
+    yaxis: { title: 'Y' },
+    margin: { t: 38, l: 45, r: 20, b: 40 },
+    height: 230
+  }, { staticPlot: true });
+
+  // Deck 4B: Seaborn catplot col='Survived'
+  Plotly.newPlot('plot-sns-cat', [
+    { x: ['1st (Died)', '2nd (Died)', '3rd (Died)', '1st (Surv)', '2nd (Surv)', '3rd (Surv)'], y: [77, 91, 300, 45, 17, 47], name: 'male', type: 'bar', marker: { color: '#3b82f6' } },
+    { x: ['1st (Died)', '2nd (Died)', '3rd (Died)', '1st (Surv)', '2nd (Surv)', '3rd (Surv)'], y: [3, 6, 72, 91, 70, 72], name: 'female', type: 'bar', marker: { color: '#f97316' } }
   ], {
     barmode: 'group',
-    yaxis: { title: 'Survival Rate', range: [0, 1.05] },
-    xaxis: { title: 'Pclass' },
-    margin: { t: 20, l: 45, r: 20, b: 40 },
-    height: 220
+    yaxis: { title: 'Passenger Count' },
+    margin: { t: 25, l: 48, r: 15, b: 45 },
+    height: 230
   }, { staticPlot: true });
 
-  // Render live interactive Plotly Express chart
-  Plotly.newPlot('px-chart', [
+  // Deck 4B: Seaborn KDE Curves
+  const ages = [0, 5, 10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80];
+  Plotly.newPlot('plot-sns-kde', [
+    { x: ages, y: [0.001, 0.002, 0.003, 0.012, 0.025, 0.028, 0.021, 0.014, 0.010, 0.005, 0.002, 0.001, 0.0], fill: 'tozeroy', name: 'Survived = 0', line: { shape: 'spline', color: '#3b82f6' } },
+    { x: ages, y: [0.003, 0.004, 0.003, 0.007, 0.011, 0.012, 0.011, 0.009, 0.006, 0.003, 0.0015, 0.0003, 0.0], fill: 'tozeroy', name: 'Survived = 1', line: { shape: 'spline', color: '#f97316' } }
+  ], {
+    title: 'KDE Distribution of Age by Survival Status',
+    xaxis: { title: 'Age' },
+    yaxis: { title: 'Density' },
+    margin: { t: 38, l: 55, r: 15, b: 40 },
+    height: 230
+  }, { staticPlot: true });
+
+  // Deck 4C: Interactive Plotly Express Bubble Scatter
+  Plotly.newPlot('plot-px-live', [
     {
-      x: [22, 35, 54, 19, 42, 28],
-      y: [7.25, 53.1, 51.8, 8.05, 26.5, 13.0],
+      x: [22, 35, 54, 19, 42, 28, 31, 47],
+      y: [7.25, 53.1, 51.8, 8.05, 26.5, 13.0, 18.0, 38.5],
+      text: ['Sex: male, Pclass: 3', 'Sex: male, Pclass: 1', 'Sex: male, Pclass: 1', 'Sex: male, Pclass: 3', 'Sex: male, Pclass: 2', 'Sex: male, Pclass: 2', 'Sex: female, Pclass: 3', 'Sex: male, Pclass: 1'],
       mode: 'markers',
-      name: 'Died (0)',
-      marker: { size: [10, 22, 21, 10, 16, 12], color: '#ef4444' }
+      name: 'Survived = "0"',
+      marker: { size: [9, 20, 19, 9, 14, 11, 12, 17], color: '#ef4444' }
     },
     {
-      x: [38, 26, 35, 27, 14, 49],
-      y: [71.28, 7.92, 53.1, 11.13, 30.07, 76.7],
+      x: [38, 26, 35, 27, 14, 49, 4, 29],
+      y: [71.28, 7.92, 53.1, 11.13, 30.07, 76.7, 16.7, 65.0],
+      text: ['Sex: female, Pclass: 1', 'Sex: female, Pclass: 3', 'Sex: female, Pclass: 1', 'Sex: female, Pclass: 3', 'Sex: female, Pclass: 2', 'Sex: female, Pclass: 1', 'Sex: female, Pclass: 3', 'Sex: female, Pclass: 1'],
       mode: 'markers',
-      name: 'Survived (1)',
-      marker: { size: [26, 10, 22, 11, 17, 28], color: '#10b981' }
+      name: 'Survived = "1"',
+      marker: { size: [24, 9, 20, 10, 15, 25, 12, 22], color: '#10b981' }
     }
   ], {
-    title: 'Titanic: Age vs Fare (Interactive)',
+    title: 'Fare vs Age (Interactive Bubble Chart)',
     xaxis: { title: 'Age' },
     yaxis: { title: 'Fare' },
-    margin: { t: 35, l: 45, r: 20, b: 40 },
-    height: 220
+    margin: { t: 38, l: 48, r: 15, b: 40 },
+    height: 230
   });
 </script>
 
